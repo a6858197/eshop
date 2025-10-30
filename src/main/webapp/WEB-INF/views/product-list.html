@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>商品列表</title>
+<meta charset="UTF-8">
+</head>
+
+<style>
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+th, td {
+	text-align: center; /* ✅ 標題 + 內容置中 */
+	padding: 8px;
+	border: 1px solid #ccc;
+}
+</style>
+
+
+<body>
+
+	<!-- ✅ 右上角登入 / 登出 -->
+	<div style="text-align: right; margin-bottom: 15px; font-size: 16px;">
+		<br> <a th:href="@{/cart}"
+			style="padding: 6px 12px; background: black; color: white; text-decoration: none; border-radius: 4px;"
+			class="btn btn-primary mb-3"> 🛒檢視訂單</a>
+
+
+
+		<!-- 尚未登入 -->
+		<span th:if="${loggedInUser == null}"> <a th:href="@{/login}"
+			style="padding: 6px 12px; background: black; color: white; text-decoration: none; border-radius: 4px;">
+				登入 </a>
+		</span>
+
+		<!-- 已登入 -->
+		<span th:if="${loggedInUser != null}"> 👋 歡迎，<span
+			th:text="${loggedInUser.name}"></span> | <a th:href="@{/logout}"
+			style="padding: 6px 12px; background: black; color: white; text-decoration: none; border-radius: 4px;">
+				登出 </a>
+		</span>
+
+	</div>
+
+	<h1>商品列表</h1>
+
+	<!-- 🔍 搜尋 / 分類 / 排序 功能 -->
+	<form th:action="@{/products}" method="get"
+		style="margin-bottom: 15px;">
+
+		<!-- 關鍵字搜尋 -->
+		<input type="text" name="keyword" placeholder="輸入關鍵字搜尋"
+			th:value="${param.keyword}" style="width: 200px;">
+
+		<!-- 分類篩選（可依需求固定選項或動態生成） -->
+		<select name="category">
+			<option value="">--全部分類--</option>
+			<option value="Audio" th:selected="${param.category == 'Audio'}">音訊</option>
+			<option value="Phone" th:selected="${param.category == 'Phone'}">手機</option>
+			<option value="Laptop" th:selected="${param.category == 'Laptop'}">筆電</option>
+			<!-- 如需動態： th:each="c : ${categories}" -->
+		</select>
+
+		<!-- 排序條件 -->
+		<select name="sort">
+			<option value="newest" th:selected="${param.sort == 'newest'}">最新上架</option>
+			<option value="priceAsc" th:selected="${param.sort == 'priceAsc'}">價格：低
+				→ 高</option>
+			<option value="priceDesc" th:selected="${param.sort == 'priceDesc'}">價格：高
+				→ 低</option>
+		</select>
+
+		<button type="submit">搜尋</button>
+	</form>
+
+	<table border="1">
+		<tr>
+			<th>圖片</th>
+			<th>名稱</th>
+			<th>分類</th>
+			<th>價格</th>
+			<th>操作</th>
+		</tr>
+
+		<tr th:each="p : ${products}">
+			<td><img th:src="@{${p.image}}" width="100" /></td>
+			<td th:text="${p.name}"></td>
+			<td th:text="${p.category}"></td>
+			<td th:text="${p.price} + ' 元'"></td>
+			<td>
+				<!-- 查看詳情 --> <a th:href="@{'/products/' + ${p.id}}">查看</a> <!-- 加入購物車 -->
+				<form th:action="@{'/cart/add/' + ${p.id}}" method="post"
+					style="display: inline;">
+					<input type="number" name="quantity" value="1" min="1"
+						style="width: 50px;">
+					<button type="submit">加入購物車</button>
+				</form>
+			</td>
+		</tr>
+	</table>
+
+
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title th:text="${product.name} + ' 詳細資訊'">商品詳細</title>
+
+<style>
+body {
+	font-family: "Microsoft JhengHei", sans-serif;
+	background-color: #f5f5f5;
+	padding: 30px;
+}
+
+img {
+	width: 200px;
+	border-radius: 6px;
+}
+
+.container {
+	background: white;
+	padding: 20px;
+	border-radius: 8px;
+	width: 500px;
+	margin: auto;
+	box-shadow: 0 0 10px #ccc;
+}
+
+.back-link {
+	margin-top: 20px;
+	display: inline-block;
+	color: #000;
+	text-decoration: none;
+}
+
+.back-link:hover {
+	font-weight: bold;
+}
+
+.add-cart-btn {
+	background-color: #009688;
+	color: white;
+	border: none;
+	padding: 8px 14px;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.add-cart-btn:hover {
+	background-color: #00796b;
+}
+</style>
+</head>
+
+<body>
+
+	<!-- ✅ 顯示登入者 -->
+	<div class="welcome" style="text-align: right; margin-bottom: 10px;">
+		<span th:if="${loggedInUser != null}"> 👋 歡迎, <span
+			th:text="${loggedInUser.name}"></span> | <a th:href="@{/logout}">登出</a>
+		</span>
+		<span th:if="${loggedInUser == null}">
+			<a th:href="@{/login}">登入</a>
+		</span>
+	</div>
+
+	<div class="container">
+		<h2 th:text="${product.name}"></h2>
+
+		<p>分類：<span th:text="${product.category}"></span></p>
+
+		<p>
+			<img th:src="@{'/resources/images/' + ${product.image}}" alt="商品圖片">
+		</p>
+
+		<p>價格：<span th:text="${product.price}"></span> 元</p>
+
+		<p>描述：</p>
+		<p th:text="${product.description}"></p>
+
+		<!-- ✅ 加入購物車 Form -->
+		<form th:action="@{/cart/add}" method="post">
+			<input type="hidden" name="productId" th:value="${product.id}">
+			數量：
+			<input type="number" name="quantity" value="1" min="1" style="width:60px;">
+			<button type="submit" class="add-cart-btn">加入購物車</button>
+		</form>
+
+		<br>
+		<a class="back-link" th:href="@{/products}">← 返回商品列表</a>
+	</div>
+
+</body>
+</html>

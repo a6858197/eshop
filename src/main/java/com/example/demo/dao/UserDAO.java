@@ -1,15 +1,20 @@
 package com.example.demo.dao;
 
-import com.example.demo.model.User;
 import java.util.List;
 
+import com.example.demo.model.User;
+
 public interface UserDAO {
-    
-    List<User> findAll();
-    
-    User findById(Long id);
-    
-    void save(User user);
-    
-    void delete(Long id);
+	List<User> findAll();
+
+	User findById(Long id);
+
+	void save(User user);
+
+	void delete(Long id);
+
+	User findByNameAndPassword(String name, String password);
+	
+	User findByEmail(String email);
+
 }

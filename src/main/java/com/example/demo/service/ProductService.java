@@ -5,18 +5,19 @@ import java.util.List;
 
 public interface ProductService {
 
-	// 取得所有商品
 	List<Product> getAllProducts();
 
-	// 根據 ID 查詢單一商品
+	// ✅ 新增分類查詢方法
+	List<Product> getProductsByCategory(String category);
+
+	List<Product> searchProducts(String keyword);
+
 	Product getProductById(Long id);
 
-	// 新增商品
 	void saveProduct(Product product);
 
-	// 更新商品資料
-	void updateProduct(Long id, Product updatedProduct);
+	void updateProduct(Long id, Product product);
 
-	// 刪除商品
 	void deleteProduct(Long id);
+
 }

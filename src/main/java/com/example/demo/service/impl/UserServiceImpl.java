@@ -12,36 +12,48 @@ import java.util.List;
 @Transactional
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserDAO userRepository;
+	@Autowired
+	private UserDAO userDao;
 
-    @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+	@Override
+	public void updateUser(Long id, User updatedUser) {
+		User existingUser = userDao.findById(id);
+		if (existingUser != null) {
+			existingUser.setName(updatedUser.getName());
+			existingUser.setEmail(updatedUser.getEmail());
+			existingUser.setPassword(updatedUser.getPassword());
+			userDao.save(existingUser);
+		}
+	}
 
-    @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id);
-    }
+	@Override
+	public User login(String username, String password) {
+		return userDao.findByNameAndPassword(username, password);
+	}
 
-    @Override
-    public void saveUser(User user) {
-        userRepository.save(user);
-    }
+	@Override
+	public List<User> getAllUsers() {
+		return userDao.findAll();
+	}
 
-    @Override
-    public void updateUser(Long id, User updatedUser) {
-        User existingUser = userRepository.findById(id);
-        if (existingUser != null) {
-            existingUser.setName(updatedUser.getName());
-            existingUser.setEmail(updatedUser.getEmail());
-            userRepository.save(existingUser);
-        }
-    }
+	@Override
+	public User getUserById(Long id) {
+		return userDao.findById(id);
+	}
 
-    @Override
-    public void deleteUser(Long id) {
-        userRepository.delete(id);
-    }
+	@Override
+	public void saveUser(User user) {
+		userDao.save(user);
+	}
+
+	@Override
+	public void deleteUser(Long id) {
+		userDao.delete(id);
+	}
+	
+	  @Override
+	    public User findByEmail(String email) {
+	        return userDao.findByEmail(email);
+	    }
+	
 }

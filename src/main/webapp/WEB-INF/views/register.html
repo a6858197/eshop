@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>會員註冊</title>
+</head>
+<body>
+
+	<h2>會員註冊</h2>
+
+	<form th:action="@{/register}" method="post">
+		<label>姓名：</label> <input type="text" name="name" required><br>
+
+		<label>Email：</label> <input type="email" name="email" required><br>
+
+		<label>密碼：</label> <input type="password" name="password" required><br>
+
+		<input type="submit" value="註冊">
+	</form>
+
+	<p th:if="${message != null}" th:text="${message}"
+		style="color: green;"></p>
+
+</body>
+</html>

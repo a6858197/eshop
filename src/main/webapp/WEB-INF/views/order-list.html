@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>訂單列表</title>
+<style>
+body {
+	font-family: "Microsoft JhengHei";
+	background-color: #f5f5f5;
+	padding: 20px;
+}
+
+h2 {
+	text-align: center;
+	color: #333;
+}
+
+table {
+	width: 80%;
+	margin: 20px auto;
+	border-collapse: collapse;
+	background-color: white;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+	border: 1px solid #ccc;
+	padding: 10px;
+	text-align: center;
+}
+
+th {
+	background-color: #009688;
+	color: white;
+}
+
+a {
+	text-decoration: none;
+	color: #009688;
+	font-weight: bold;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+</style>
+</head>
+<body>
+
+	<h2>訂單列表</h2>
+
+	<table id="orderTable">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>總額</th>
+				<th>狀態</th>
+				<th>操作</th>
+			</tr>
+		</thead>
+		<tbody>
+			<!-- JavaScript 會在這裡插入訂單資料 -->
+		</tbody>
+	</table>
+
+	<script>
+// 模擬後端傳來的訂單資料（你可改成 fetch 從 API 拿資料）
+const orders = [
+	{ id: 1, total: 1500, status: "待付款" },
+	{ id: 2, total: 2500, status: "已付款" },
+	{ id: 3, total: 1800, status: "已發貨" }
+];
+
+// 找到表格主體
+const tbody = document.querySelector("#orderTable tbody");
+
+// 動態生成每筆訂單列
+orders.forEach(order => {
+	const tr = document.createElement("tr");
+	tr.innerHTML = `
+		<td>${order.id}</td>
+		<td>$${order.total}</td>
+		<td>${order.status}</td>
+		<td>
+			<a href="/orders/${order.id}">查看</a> |
+			<a href="/orders/delete/${order.id}">刪除</a>
+		</td>
+	`;
+	tbody.appendChild(tr);
+});
+</script>
+
+</body>
+</html>
