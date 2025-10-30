@@ -11,8 +11,11 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private Long userId; // 使用者ID，可選，如果有會員系統
+    
+ // ✅ 使用 ManyToOne 來關聯會員
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false) // 對應資料表欄位 user_id
+    private User user;
     private Date orderDate;
     private String status;
     private Double total;
@@ -31,11 +34,15 @@ public class Order {
     // --- Getters / Setters ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+    public User getUser() {
+		return user;
+	}
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+	public void setUser(User user) {
+		this.user = user;
+	}
 
-    public Date getOrderDate() { return orderDate; }
+	public Date getOrderDate() { return orderDate; }
     public void setOrderDate(Date orderDate) { this.orderDate = orderDate; }
 
     public String getStatus() { return status; }
@@ -58,7 +65,7 @@ public class Order {
 
     @Override
     public String toString() {
-        return "Order{id=" + id + ", userId=" + userId + ", orderDate=" + orderDate +
+        return "Order{id=" + id + ", userId=" + user + ", orderDate=" + orderDate +
                 ", status='" + status + '\'' + ", total=" + total + '}';
     }
 }
