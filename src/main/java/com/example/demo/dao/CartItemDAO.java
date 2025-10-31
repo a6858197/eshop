@@ -10,9 +10,9 @@ public interface CartItemDAO {
 
 	CartItem findByCartIdAndProductId(Long cartId, Long productId);
 
-	void save(CartItem cartItem);
+	void save(CartItem item);
 
-	void update(CartItem cartItem);
+	void update(CartItem item);
 
 	void delete(Long id);
 

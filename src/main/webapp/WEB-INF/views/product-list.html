@@ -57,9 +57,9 @@ th, td {
 		<!-- 分類篩選（可依需求固定選項或動態生成） -->
 		<select name="category">
 			<option value="">--全部分類--</option>
-			<option value="Audio" th:selected="${param.category == 'Audio'}">音訊</option>
-			<option value="Phone" th:selected="${param.category == 'Phone'}">手機</option>
-			<option value="Laptop" th:selected="${param.category == 'Laptop'}">筆電</option>
+			<option value="Audio" th:selected="${param.category == 'Audio'}">音響</option>
+			<option value="Phone" th:selected="${param.category == 'Phone'}">耳機</option>
+			<option value="Laptop" th:selected="${param.category == 'Laptop'}">手錶</option>
 			<!-- 如需動態： th:each="c : ${categories}" -->
 		</select>
 

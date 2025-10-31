@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <title>購物車</title>
 </head>
-
 <body>
+
 <h2>購物車</h2>
 
 <table border="1">
@@ -32,16 +31,15 @@
 
         <td th:text="${item.subtotal}"></td>
 
-        <td>
-            <a th:href="@{'/cart/remove/' + ${item.product.id}}">移除</a>
-        </td>
+        <td><a th:href="@{'/cart/remove/' + ${item.product.id}}">移除</a></td>
     </tr>
 
 </table>
 
 <h3>總金額: <span th:text="${cart.total}"></span></h3>
 
-<a href="/echop/products">繼續購物</a>
+<a th:href="@{/products}">繼續購物</a>
+<a th:href="@{/checkout}">前往結帳</a> <!-- ✅ 加上結帳按鈕 -->
 
 </body>
 </html>

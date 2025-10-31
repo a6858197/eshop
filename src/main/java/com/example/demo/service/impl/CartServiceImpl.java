@@ -32,7 +32,7 @@ public class CartServiceImpl implements CartService {
         return cartDAO.findByMemberId(member.getId());
     }
 
-    // ✅ 未登入 → 使用 Session Cart
+    // ✅ 未登入：使用 Session Cart
     @Override
     public Cart addToGuestCart(Cart sessionCart, Product product, int quantity) {
 
@@ -58,11 +58,10 @@ public class CartServiceImpl implements CartService {
         newItem.setPriceSnapshot(product.getPrice());
 
         sessionCart.getItems().add(newItem);
-
         return sessionCart;
     }
 
-    // ✅ 已登入 → 存入 DB
+    // ✅ 已登入 → 寫入 DB
     @Override
     public void addToMemberCart(User member, Product product, int quantity) {
 
@@ -71,7 +70,7 @@ public class CartServiceImpl implements CartService {
         if (cart == null) {
             cart = new Cart();
             cart.setMember(member);
-            cartDAO.createCart(cart);
+            cartDAO.save(cart); // ✅ 使用 save() (新增 / 更新 自動判斷)
         }
 
         CartItem item = cartItemDAO.findByCartIdAndProductId(cart.getId(), product.getId());
@@ -89,7 +88,7 @@ public class CartServiceImpl implements CartService {
         }
     }
 
-    // ⭐ 登入時 → Session Cart → DB Merge
+    // ✅ 登入時 Session → DB 合併
     @Override
     public void mergeCart(User member, Cart sessionCart) {
         if (sessionCart == null || sessionCart.getItems() == null) return;
@@ -110,15 +109,14 @@ public class CartServiceImpl implements CartService {
         if (item == null) return;
 
         if (quantity <= 0) {
-        	cartItemDAO.delete(item.getId());
-
+            cartItemDAO.delete(item.getId());
         } else {
             item.setQuantity(quantity);
             cartItemDAO.update(item);
         }
     }
 
-    // ✅ 移除項目
+    // ✅ 移除單一商品
     @Override
     public void removeItem(User member, Long productId) {
 
@@ -127,8 +125,13 @@ public class CartServiceImpl implements CartService {
 
         CartItem item = cartItemDAO.findByCartIdAndProductId(cart.getId(), productId);
         if (item != null) {
-        	cartItemDAO.delete(item.getId());
-
+            cartItemDAO.delete(item.getId());
         }
+    }
+
+    // ✅ CheckoutService 呼叫：清空 / 更新購物車
+    @Override
+    public void save(Cart cart) {
+        cartDAO.save(cart);
     }
 }

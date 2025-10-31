@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>訂單明細</title>
+</head>
+<body>
+
+	<h2>訂單明細</h2>
+
+	<p>
+		訂單編號：<span th:text="${order.id}"></span>
+	</p>
+	<p>
+		訂購日期：<span
+			th:text="${#dates.format(order.orderDate, 'yyyy-MM-dd HH:mm')}"></span>
+	</p>
+	<p>
+		付款方式：<span th:text="${order.paymentMethod}"></span>
+	</p>
+	<p>
+		收件地址：<span th:text="${order.address}"></span>
+	</p>
+	<p>
+		發票類型：<span th:text="${order.invoiceType}"></span>
+	</p>
+	<p>
+		狀態：<span th:text="${order.status}"></span>
+	</p>
+
+	<table border="1">
+		<tr>
+			<th>商品</th>
+			<th>單價</th>
+			<th>數量</th>
+			<th>小計</th>
+		</tr>
+
+		<tr th:each="item : ${order.items}">
+			<td th:text="${item.product.name}"></td>
+			<td th:text="${item.price}"></td>
+			<td th:text="${item.quantity}"></td>
+			<td th:text="${item.price * item.quantity}"></td>
+		</tr>
+	</table>
+
+	<h3>
+		總金額：<span th:text="${order.total}"></span> 元
+	</h3>
+
+	<a th:href="@{/orders}">返回訂單列表</a>
+
+</body>
+</html>

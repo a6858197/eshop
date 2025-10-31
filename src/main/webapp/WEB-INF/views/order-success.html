@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<title>訂單成立成功</title>
+</head>
+
+<body>
+
+	<h2>🎉 訂單成立成功！</h2>
+
+	<p>感謝您的購買，我們已經收到您的訂單。</p>
+
+	<p>
+		訂單編號： <span th:text="${orderId}">123456</span>
+	</p>
+
+	<hr>
+
+	<a th:href="@{/products}">回到商品列表</a> |
+	<a th:href="@{/orders}">查看我的訂單</a>
+
+</body>
+</html>

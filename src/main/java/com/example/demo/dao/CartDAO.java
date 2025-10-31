@@ -4,15 +4,22 @@ import com.example.demo.model.Cart;
 
 public interface CartDAO {
 
-	// 依會員查詢購物車
 	Cart findByMemberId(Long memberId);
 
-	// 建立購物車（會員第一次加入時）
-	void createCart(Cart cart);
+	/** 統一新增/更新 */
+	void save(Cart cart);
 
-	// 更新購物車內容（新增、修改數量後）
-	void updateCart(Cart cart);
+	/** 舊方法：保留相容性，直接導向 save() */
+	@Deprecated
+	default void createCart(Cart cart) {
+		save(cart);
+	}
 
-	// 清空購物車（結帳使用）
+	/** 舊方法：保留相容性，直接導向 save() */
+	@Deprecated
+	default void updateCart(Cart cart) {
+		save(cart);
+	}
+
 	void clearCart(Long cartId);
 }

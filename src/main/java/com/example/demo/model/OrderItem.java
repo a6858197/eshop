@@ -14,6 +14,10 @@ public class OrderItem {
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
+    
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     // 對應商品
     private Long productId;
@@ -37,6 +41,15 @@ public class OrderItem {
     public Order getOrder() { return order; }
     public void setOrder(Order order) { this.order = order; }
 
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    
     public Long getProductId() { return productId; }
     public void setProductId(Long productId) { this.productId = productId; }
 

@@ -20,4 +20,7 @@ public interface CartService {
 	void updateQuantity(User member, Long productId, int quantity);
 
 	void removeItem(User member, Long productId);
+	
+	void save(Cart cart);
+	
 }

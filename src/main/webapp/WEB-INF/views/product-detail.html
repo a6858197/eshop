@@ -69,7 +69,7 @@ img {
 		<p>分類：<span th:text="${product.category}"></span></p>
 
 		<p>
-			<img th:src="@{'/resources/images/' + ${product.image}}" alt="商品圖片">
+			<img th:src="@{ ${product.image}}" alt="商品圖片">
 		</p>
 
 		<p>價格：<span th:text="${product.price}"></span> 元</p>
@@ -78,12 +78,11 @@ img {
 		<p th:text="${product.description}"></p>
 
 		<!-- ✅ 加入購物車 Form -->
-		<form th:action="@{/cart/add}" method="post">
-			<input type="hidden" name="productId" th:value="${product.id}">
-			數量：
-			<input type="number" name="quantity" value="1" min="1" style="width:60px;">
-			<button type="submit" class="add-cart-btn">加入購物車</button>
-		</form>
+			<form th:action="@{'/cart/add/' + ${product.id}}" method="post">
+    <input type="number" name="quantity" value="1" min="1">
+    <button type="submit">加入購物車</button>
+</form>
+
 
 		<br>
 		<a class="back-link" th:href="@{/products}">← 返回商品列表</a>
