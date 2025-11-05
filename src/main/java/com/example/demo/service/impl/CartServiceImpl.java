@@ -18,120 +18,121 @@ import java.util.ArrayList;
 @Transactional
 public class CartServiceImpl implements CartService {
 
-    @Autowired
-    private CartDAO cartDAO;
+	@Autowired
+	private CartDAO cartDAO;
 
-    @Autowired
-    private CartItemDAO cartItemDAO;
+	@Autowired
+	private CartItemDAO cartItemDAO;
 
-    @Autowired
-    private ProductDAO productDAO;
+	@Autowired
+	private ProductDAO productDAO;
 
-    @Override
-    public Cart getCartByMember(User member) {
-        return cartDAO.findByMemberId(member.getId());
-    }
+	@Override
+	public Cart getCartByMember(User member) {
+		return cartDAO.findByMemberId(member.getId());
+	}
 
-    // ✅ 未登入：使用 Session Cart
-    @Override
-    public Cart addToGuestCart(Cart sessionCart, Product product, int quantity) {
+	// ✅ 未登入：使用 Session Cart
+	@Override
+	public Cart addToGuestCart(Cart sessionCart, Product product, int quantity) {
 
-        if (sessionCart == null) {
-            sessionCart = new Cart();
-        }
+		if (sessionCart == null) {
+			sessionCart = new Cart();
+		}
 
-        if (sessionCart.getItems() == null) {
-            sessionCart.setItems(new ArrayList<>());
-        }
+		if (sessionCart.getItems() == null) {
+			sessionCart.setItems(new ArrayList<>());
+		}
 
-        for (CartItem item : sessionCart.getItems()) {
-            if (item.getProduct().getId().equals(product.getId())) {
-                item.setQuantity(item.getQuantity() + quantity);
-                return sessionCart;
-            }
-        }
+		for (CartItem item : sessionCart.getItems()) {
+			if (item.getProduct().getId().equals(product.getId())) {
+				item.setQuantity(item.getQuantity() + quantity);
+				return sessionCart;
+			}
+		}
 
-        CartItem newItem = new CartItem();
-        newItem.setCart(sessionCart);
-        newItem.setProduct(product);
-        newItem.setQuantity(quantity);
-        newItem.setPriceSnapshot(product.getPrice());
+		CartItem newItem = new CartItem();
+		newItem.setCart(sessionCart);
+		newItem.setProduct(product);
+		newItem.setQuantity(quantity);
+		newItem.setPriceSnapshot(product.getPrice());
 
-        sessionCart.getItems().add(newItem);
-        return sessionCart;
-    }
+		sessionCart.getItems().add(newItem);
+		return sessionCart;
+	}
 
-    // ✅ 已登入 → 寫入 DB
-    @Override
-    public void addToMemberCart(User member, Product product, int quantity) {
+	// ✅ 已登入 → 寫入 DB
+	@Override
+	public void addToMemberCart(User member, Product product, int quantity) {
 
-        Cart cart = getCartByMember(member);
+		Cart cart = getCartByMember(member);
 
-        if (cart == null) {
-            cart = new Cart();
-            cart.setMember(member);
-            cartDAO.save(cart); // ✅ 使用 save() (新增 / 更新 自動判斷)
-        }
+		if (cart == null) {
+			cart = new Cart();
+			cart.setMember(member);
+			cartDAO.save(cart); // ✅ 使用 save() (新增 / 更新 自動判斷)
+		}
 
-        CartItem item = cartItemDAO.findByCartIdAndProductId(cart.getId(), product.getId());
+		CartItem item = cartItemDAO.findByCartIdAndProductId(cart.getId(), product.getId());
 
-        if (item == null) {
-            item = new CartItem();
-            item.setCart(cart);
-            item.setProduct(product);
-            item.setQuantity(quantity);
-            item.setPriceSnapshot(product.getPrice());
-            cartItemDAO.save(item);
-        } else {
-            item.setQuantity(item.getQuantity() + quantity);
-            cartItemDAO.update(item);
-        }
-    }
+		if (item == null) {
+			item = new CartItem();
+			item.setCart(cart);
+			item.setProduct(product);
+			item.setQuantity(quantity);
+			item.setPriceSnapshot(product.getPrice());
+			cartItemDAO.save(item);
+		} else {
+			item.setQuantity(item.getQuantity() + quantity);
+			cartItemDAO.update(item);
+		}
+	}
 
-    // ✅ 登入時 Session → DB 合併
-    @Override
-    public void mergeCart(User member, Cart sessionCart) {
-        if (sessionCart == null || sessionCart.getItems() == null) return;
+	// ✅ 登入時 Session → DB 合併
+	@Override
+	public void mergeCart(User member, Cart sessionCart) {
+		if (sessionCart == null || sessionCart.getItems() == null)
+			return;
 
-        for (CartItem sessionItem : sessionCart.getItems()) {
-            addToMemberCart(member, sessionItem.getProduct(), sessionItem.getQuantity());
-        }
-    }
+		for (CartItem sessionItem : sessionCart.getItems()) {
+			addToMemberCart(member, sessionItem.getProduct(), sessionItem.getQuantity());
+		}
+	}
 
-    // ✅ 更新數量
-    @Override
-    public void updateQuantity(User member, Long productId, int quantity) {
+	// ✅ 更新數量
+	@Override
+	public void updateQuantity(User user, Long itemId, int quantity) {
+		Cart cart = cartDAO.findByMemberId(user.getId());
+		CartItem item = cartItemDAO.findById(itemId);
 
-        Cart cart = getCartByMember(member);
-        if (cart == null) return;
+		if (item != null && item.getCart().getId().equals(cart.getId())) {
+			item.setQuantity(quantity);
+		}
+	}
 
-        CartItem item = cartItemDAO.findByCartIdAndProductId(cart.getId(), productId);
-        if (item == null) return;
+	// ✅ 移除單一商品
+	@Override
+	public void removeItem(User member, Long productId) {
 
-        if (quantity <= 0) {
-            cartItemDAO.delete(item.getId());
-        } else {
-            item.setQuantity(quantity);
-            cartItemDAO.update(item);
-        }
-    }
+		Cart cart = getCartByMember(member);
+		if (cart == null)
+			return;
 
-    // ✅ 移除單一商品
-    @Override
-    public void removeItem(User member, Long productId) {
+		CartItem item = cartItemDAO.findByCartIdAndProductId(cart.getId(), productId);
+		if (item != null) {
+			cartItemDAO.delete(item.getId());
+		}
+	}
 
-        Cart cart = getCartByMember(member);
-        if (cart == null) return;
+	// ✅ CheckoutService 呼叫：清空 / 更新購物車
+	@Override
+	public void save(Cart cart) {
+		cartDAO.save(cart);
+	}
 
-        CartItem item = cartItemDAO.findByCartIdAndProductId(cart.getId(), productId);
-        if (item != null) {
-            cartItemDAO.delete(item.getId());
-        }
-    }
-
-    // ✅ CheckoutService 呼叫：清空 / 更新購物車
-    @Override
-    public void save(Cart cart) {
-        cartDAO.save(cart);
-    }
+	// ✅ 清空購物車
+	@Override
+	public void clearCart(Long cartId) {
+		cartItemDAO.deleteByCartId(cartId);
+	}
 }

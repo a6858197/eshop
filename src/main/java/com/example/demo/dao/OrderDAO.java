@@ -9,7 +9,7 @@ public interface OrderDAO {
 
 	Order findById(Long id);
 
-	List<Order> findByUserId(Long userId);
+	List<Order> findByUserId(Long userid);
 
 	List<Order> findAll();
 }

@@ -1,13 +1,13 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Product;
-import com.example.demo.model.User;
-import com.example.demo.service.ProductService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import com.example.demo.model.Product;
+import com.example.demo.model.User;
+import com.example.demo.service.ProductService;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -30,7 +30,7 @@ public class ProductController {
 			products = productService.searchProducts(keyword); // ✅ 搜尋商品
 		} else if (category != null && !category.trim().isEmpty()) {
 			products = productService.getProductsByCategory(category); // ✅ 分類查詢
-		} else {
+		} else {	
 			products = productService.getAllProducts(); // ✅ 全部商品
 		}
 
@@ -40,7 +40,7 @@ public class ProductController {
 		User user = (User) session.getAttribute("loggedInUser");
 		model.addAttribute("loggedInUser", user);
 
-		return "product-list"; // 對應 /WEB-INF/views/products-list.jsp
+		return "product-list"; // 對應 /WEB-INF/views/products-list.html
 	}
 
 	// ✅ 商品詳細
@@ -53,7 +53,7 @@ public class ProductController {
 		User user = (User) session.getAttribute("loggedInUser");
 		model.addAttribute("loggedInUser", user);
 
-		return "product-detail"; // 對應 /WEB-INF/views/product-detail.jsp
+		return "product-detail"; // 對應 /WEB-INF/views/product-detail.html
 	}
 }
 

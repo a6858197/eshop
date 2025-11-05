@@ -23,4 +23,6 @@ public interface CartService {
 	
 	void save(Cart cart);
 	
+	/** ✅ 新增：清空購物車 */
+    void clearCart(Long cartId);
 }

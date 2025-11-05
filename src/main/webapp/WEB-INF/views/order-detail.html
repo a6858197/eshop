@@ -3,6 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <title>訂單明細</title>
+<style>
+table {
+	border-collapse: collapse;
+	width: 60%;
+	margin-top: 15px;
+}
+
+th, td {
+	border: 1px solid #ccc;
+	padding: 8px;
+	text-align: center;
+}
+
+.pay-box {
+	margin-top: 25px;
+	padding: 15px;
+	border: 1px solid #ccc;
+	width: 350px;
+	background: #fafafa;
+}
+</style>
 </head>
 <body>
 
@@ -24,23 +45,23 @@
 	<p>
 		發票類型：<span th:text="${order.invoiceType}"></span>
 	</p>
+
 	<p>
-		狀態：<span th:text="${order.status}"></span>
+		<strong>狀態：</strong> <span th:text="${order.status}"></span>
 	</p>
 
-	<table border="1">
+	<table>
 		<tr>
 			<th>商品</th>
 			<th>單價</th>
 			<th>數量</th>
 			<th>小計</th>
 		</tr>
-
 		<tr th:each="item : ${order.items}">
 			<td th:text="${item.product.name}"></td>
 			<td th:text="${item.price}"></td>
 			<td th:text="${item.quantity}"></td>
-			<td th:text="${item.price * item.quantity}"></td>
+			<td th:text="${item.subtotal}"></td>
 		</tr>
 	</table>
 
@@ -48,6 +69,32 @@
 		總金額：<span th:text="${order.total}"></span> 元
 	</h3>
 
+	<!-- ✅ 若未付款 → 顯示付款 Form -->
+	<div class="pay-box" th:if="${order.status == '待付款'}">
+		<h3>進行付款</h3>
+		<form th:action="@{'/orders/' + ${order.id} + '/pay'}" method="post">
+			<label>付款方式：</label> <select name="method">
+				<option value="ATM">ATM</option>
+				<option value="CREDIT">信用卡</option>
+				<option value="LINEPAY">LinePay</option>
+			</select> <br>
+			<br> <label>付款提供商：</label> <input type="text" name="provider"
+				placeholder="例如：台新銀行 or VISA" required> <br>
+			<br>
+			<button type="submit">確認付款</button>
+		</form>
+	</div>
+
+	<!-- ✅ 已付款 → 顯示付款紀錄 -->
+	<div class="pay-box" th:if="${order.status == '已付款'}">
+		<h3>付款資訊</h3>
+		<p>
+			付款方式：<span th:text="${order.paymentMethod}"></span>
+		</p>
+		<p style="color: green; font-weight: bold;">✅ 已完成付款</p>
+	</div>
+
+	<br>
 	<a th:href="@{/orders}">返回訂單列表</a>
 
 </body>

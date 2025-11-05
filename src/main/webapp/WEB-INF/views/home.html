@@ -7,7 +7,8 @@
 </head>
 <body>
 	<h1 th:text="#{home.message}">Hello</h1>
-	<button th:text="#{button.save}">Save</button>
+	<!-- ✅ 按下 Save → 導向 /users -->
+	<a href="/echop/users"><button>Save</button></a>
 
 	<hr>
 	<a th:href="@{/?lang=en}">English</a> |

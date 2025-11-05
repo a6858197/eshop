@@ -1,5 +1,7 @@
 package com.example.demo.model;
 
+import java.util.Date;
+
 import javax.persistence.*;
 
 @Entity
@@ -19,12 +21,40 @@ public class User {
     @Column(name = "password")  // ✅ 新增這行
     private String password;
 
+ // ✅ 使用者角色（user / admin）
+    @Column(name = "role", nullable = false)
+    private String role = "user"; // 預設為一般使用者
+
+    // ✅ 建立時間
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_at", updatable = false)
+    private Date createdAt;
+
+    // ✅ 修改時間
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_at")
+    private Date updatedAt;
+
+    // ✅ 建立時自動填入
+    @PrePersist
+    protected void onCreate() {
+        createdAt = new Date();
+        updatedAt = new Date();
+    }
+
+    // ✅ 更新時自動更新
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = new Date();
+    }
+    
     public User() {}
 
     public User(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = "user"; // 註冊時預設角色
     }
 
     // Getters and Setters

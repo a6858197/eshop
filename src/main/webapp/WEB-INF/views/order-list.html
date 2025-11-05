@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <title>訂單列表</title>
+
 <style>
 body {
 	font-family: "Microsoft JhengHei";
@@ -34,61 +35,75 @@ th {
 	color: white;
 }
 
-a {
+/* ✅ 黑底白字一致按鈕 */
+.btn {
+	padding: 6px 12px;
+	background: black;
+	color: white;
+	border-radius: 6px;
 	text-decoration: none;
-	color: #009688;
-	font-weight: bold;
+	font-size: 14px;
+	border: none;
+	cursor: pointer;
 }
 
-a:hover {
-	text-decoration: underline;
+.btn:hover {
+	background: #333;
+}
+
+select {
+	padding: 6px;
+	border-radius: 4px;
 }
 </style>
+
 </head>
 <body>
 
 	<h2>訂單列表</h2>
 
-	<table id="orderTable">
+	<div th:if="${#lists.isEmpty(orders)}" class="empty-msg">尚無訂單紀錄</div>
+
+	<table th:if="${!#lists.isEmpty(orders)}">
 		<thead>
 			<tr>
 				<th>ID</th>
-				<th>總額</th>
+				<th>下單時間</th>
+				<th>總金額</th>
 				<th>狀態</th>
 				<th>操作</th>
 			</tr>
 		</thead>
+
 		<tbody>
-			<!-- JavaScript 會在這裡插入訂單資料 -->
+			<tr th:each="order : ${orders}">
+				<td th:text="${order.id}"></td>
+				<td th:text="${#dates.format(order.orderDate, 'yyyy-MM-dd HH:mm')}"></td>
+				<td th:text="${order.total} + ' 元'"></td>
+
+				<td>
+					<form th:action="@{'/orders/' + ${order.id} + '/update-status'}"
+						method="post">
+						<select name="status">
+							<option value="待付款" th:selected="${order.status=='待付款'}">待付款</option>
+							<option value="已付款" th:selected="${order.status=='已付款'}">已付款</option>
+							<option value="已出貨" th:selected="${order.status=='已出貨'}">已出貨</option>
+							<option value="已完成" th:selected="${order.status=='已完成'}">已完成</option>
+						</select>
+						<button type="submit" class="btn">更新</button>
+					</form>
+				</td>
+
+				<td><a class="btn" th:href="@{'/orders/' + ${order.id}}">查看</a>
+				</td>
+
+			</tr>
 		</tbody>
 	</table>
 
-	<script>
-// 模擬後端傳來的訂單資料（你可改成 fetch 從 API 拿資料）
-const orders = [
-	{ id: 1, total: 1500, status: "待付款" },
-	{ id: 2, total: 2500, status: "已付款" },
-	{ id: 3, total: 1800, status: "已發貨" }
-];
-
-// 找到表格主體
-const tbody = document.querySelector("#orderTable tbody");
-
-// 動態生成每筆訂單列
-orders.forEach(order => {
-	const tr = document.createElement("tr");
-	tr.innerHTML = `
-		<td>${order.id}</td>
-		<td>$${order.total}</td>
-		<td>${order.status}</td>
-		<td>
-			<a href="/orders/${order.id}">查看</a> |
-			<a href="/orders/delete/${order.id}">刪除</a>
-		</td>
-	`;
-	tbody.appendChild(tr);
-});
-</script>
+	<div style="text-align: center;">
+		<a class="btn" th:href="@{/products}">← 回商品頁</a>
+	</div>
 
 </body>
 </html>

@@ -1,25 +1,121 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
 <meta charset="UTF-8">
 <title>訂單成立成功</title>
-</head>
 
+<style>
+body {
+	font-family: "Microsoft JhengHei";
+	background: #000;
+	color: white;
+	text-align: center;
+	padding-top: 80px;
+	margin: 0;
+}
+
+/* ✅ 綠色勾勾動畫 */
+.checkmark-circle {
+	width: 130px;
+	height: 130px;
+	border-radius: 50%;
+	display: inline-block;
+	border: 6px solid #00ff9d;
+	position: relative;
+	animation: pop 0.6s ease-out;
+}
+.checkmark {
+	width: 60px;
+	height: 30px;
+	border-left: 6px solid #00ff9d;
+	border-bottom: 6px solid #00ff9d;
+	transform: rotate(-45deg);
+	position: absolute;
+	top: 38px;
+	left: 32px;
+}
+@keyframes pop {
+	0% { transform: scale(0.3); opacity: 0; }
+	100% { transform: scale(1); opacity: 1; }
+}
+
+/* ✅ 訂單資訊字體 */
+.msg {
+	font-size: 32px;
+	margin-top: 25px;
+}
+
+/* ✅ 訂單編號 */
+.order-id {
+	font-size: 28px;
+	margin-top: 10px;
+	color: #00ffea;
+}
+
+/* ✅ 按鈕 */
+.btn {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	width: 220px;
+	height: 50px;
+	font-size: 20px;
+	border-radius: 8px;
+	border: 2px solid white;
+	background: transparent;
+	color: white;
+	text-decoration: none;
+	margin-top: 40px;
+	cursor: pointer;
+	transition: 0.25s;
+}
+.btn:hover {
+	background: white;
+	color: black;
+}
+
+/* ✅ 倒數文字 */
+#countdown {
+	margin-top: 20px;
+	font-size: 22px;
+	color: #bbb;
+}
+
+</style>
+
+</head>
 <body>
 
-	<h2>🎉 訂單成立成功！</h2>
+	<div class="checkmark-circle">
+		<div class="checkmark"></div>
+	</div>
 
-	<p>感謝您的購買，我們已經收到您的訂單。</p>
+	<div class="msg">您的訂單已成功成立 ✅</div>
 
-	<p>
-		訂單編號： <span th:text="${orderId}">123456</span>
-	</p>
+	<!-- ✅ 顯示訂單編號 -->
+	<div class="order-id">
+		訂單編號：<span th:text="${orderId}"></span>
+	</div>
 
-	<hr>
+	<!-- ✅ 前往訂單列表按鈕 -->
+	<a th:href="@{/orders}" class="btn">查看我的訂單</a>
 
-	<a th:href="@{/products}">回到商品列表</a> |
-	<a th:href="@{/orders}">查看我的訂單</a>
+	<div id="countdown">3 秒後自動跳轉至訂單列表…</div>
+
+	<!-- ✅ 自動跳轉 -->
+	<script>
+		let sec = 3;
+		const cd = document.getElementById("countdown");
+
+		let timer = setInterval(() => {
+			sec--;
+			cd.textContent = sec + " 秒後自動跳轉至訂單列表…";
+			if (sec <= 0) {
+				clearInterval(timer);
+				window.location.href = "/echop/orders";
+			}
+		}, 1000);
+	</script>
 
 </body>
 </html>

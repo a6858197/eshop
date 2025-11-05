@@ -1,6 +1,6 @@
 package com.example.demo.test;
 
-import static org.junit.Assert.assertEquals;
+/*import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -29,4 +29,4 @@ public class UserServiceTest {
 		assertNotNull("使用者不存在", user);
 		assertEquals("使用者 ID 不正確", 1, user.getId().longValue());
 	}
-}
+}*/

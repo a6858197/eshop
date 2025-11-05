@@ -54,38 +54,40 @@ img {
 <body>
 
 	<!-- ✅ 顯示登入者 -->
-	<div class="welcome" style="text-align: right; margin-bottom: 10px;">
-		<span th:if="${loggedInUser != null}"> 👋 歡迎, <span
-			th:text="${loggedInUser.name}"></span> | <a th:href="@{/logout}">登出</a>
-		</span>
-		<span th:if="${loggedInUser == null}">
-			<a th:href="@{/login}">登入</a>
+	<div style="text-align: right; margin-bottom: 10px;">
+		<span th:if="${loginUser != null}"> 👋 歡迎, <span
+			th:text="${loginUser.name}"></span> | <a th:href="@{/logout}">登出</a>
+		</span> <span th:if="${loginUser == null}"> <a th:href="@{/login}">登入</a>
 		</span>
 	</div>
 
 	<div class="container">
 		<h2 th:text="${product.name}"></h2>
 
-		<p>分類：<span th:text="${product.category}"></span></p>
-
 		<p>
-			<img th:src="@{ ${product.image}}" alt="商品圖片">
+			分類：<span th:text="${product.category}"></span>
 		</p>
 
-		<p>價格：<span th:text="${product.price}"></span> 元</p>
+		<p>
+			<img th:src="@{${product.image}}" width="200" />
+
+		</p>
+
+		<p>
+			價格：<span th:text="${product.price}"></span> 元
+		</p>
 
 		<p>描述：</p>
 		<p th:text="${product.description}"></p>
 
-		<!-- ✅ 加入購物車 Form -->
-			<form th:action="@{'/cart/add/' + ${product.id}}" method="post">
-    <input type="number" name="quantity" value="1" min="1">
-    <button type="submit">加入購物車</button>
-</form>
+		<!-- ✅ 加入購物車 -->
+		<form th:action="@{/cart/add}" method="post">
+			<input type="hidden" name="productId" th:value="${product.id}">
+			<input type="number" name="quantity" value="1" min="1">
+			<button type="submit" class="add-cart-btn">加入購物車</button>
+		</form>
 
-
-		<br>
-		<a class="back-link" th:href="@{/products}">← 返回商品列表</a>
+		<br> <a class="back-link" th:href="@{/products}">← 返回商品列表</a>
 	</div>
 
 </body>

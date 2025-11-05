@@ -16,64 +16,65 @@ import java.util.List;
 @Transactional
 public class CheckoutServiceImpl implements CheckoutService {
 
-    @Autowired
-    private CartService cartService; // 取得會員購物車
+	@Autowired
+	private CartService cartService; // 取得會員購物車
 
-    @Autowired
-    private OrderDAO orderDAO; // 儲存訂單主檔
+	@Autowired
+	private OrderDAO orderDAO; // 儲存訂單主檔
 
-    @Autowired
-    private OrderItemDAO orderItemDAO; // 儲存訂單明細
+	@Autowired
+	private OrderItemDAO orderItemDAO; // 儲存訂單明細
 
-    @Override
-    public Long checkout(User user, String paymentMethod, String address, String invoiceType) {
+	@Override
+	public Long checkout(User user, String paymentMethod, String address, String invoiceType) {
 
-        // ✅ 抓會員購物車
-        Cart cart = cartService.getCartByMember(user);
-        if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
-            throw new RuntimeException("購物車為空，無法結帳");
-        }
+		// ✅ 抓會員購物車
+		Cart cart = cartService.getCartByMember(user);
+		if (cart == null || cart.getItems().isEmpty()) {
+			throw new RuntimeException("購物車為空，無法結帳");
+		}
 
-        // ✅ 建立訂單主檔
-        Order order = new Order();
-        order.setUser(user);
-        order.setStatus("待付款");
-        order.setTotal(0.0);
-        order.setOrderDate(new java.util.Date());
+		// ✅ 建立訂單主檔
+		Order order = new Order();
+		order.setUser(user);
+		order.setStatus("待付款");
+		order.setTotal(0.0);
+		order.setOrderDate(new java.util.Date());
 
-        // ✅ 設定付款與發票資訊
-        order.setPaymentMethod(paymentMethod);
-        order.setAddress(address);
-        order.setInvoiceType(invoiceType);
+		// ✅ 設定付款與發票資訊
+		order.setPaymentMethod(paymentMethod);
+		order.setAddress(address);
+		order.setInvoiceType(invoiceType);
 
-        // ✅ 將購物車項目轉為訂單明細
-        List<CartItem> cartItems = cart.getItems();
-        double total = 0.0;
+		// ✅ 一定要初始化 items
+		order.setItems(new java.util.ArrayList<>());
 
-        for (CartItem cartItem : cartItems) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(order);
-            orderItem.setProduct(cartItem.getProduct());
-            orderItem.setQuantity(cartItem.getQuantity());
-            orderItem.setPrice(cartItem.getProduct().getPrice());
+		// ✅ 將購物車項目轉為訂單明細
+		List<CartItem> cartItems = cart.getItems();
+		double total = 0.0;
 
-            // 先不存明細，先掛進 order，之後 cascade 自動存
-            order.getItems().add(orderItem);
+		for (CartItem cartItem : cartItems) {
+			OrderItem item = new OrderItem();
+			item.setOrder(order);
+			item.setProduct(cartItem.getProduct());
+			item.setQuantity(cartItem.getQuantity());
+			item.setPrice(cartItem.getPriceSnapshot());
 
-            total += cartItem.getProduct().getPrice() * cartItem.getQuantity();
-        }
+			// 先不存明細，先掛進 order，之後 cascade 自動存
+			order.getItems().add(item);
+			total += item.getSubtotal();
+		}
 
-        // ✅ 設定訂單總額
-        order.setTotal(total);
+		// ✅ 設定訂單總額
+		order.setTotal(total);
 
-        // ✅ 儲存訂單（連同訂單明細）
-        orderDAO.save(order);
+		// ✅ 儲存訂單（連同訂單明細）
+		orderDAO.save(order);
 
-        // ✅ 清除購物車
-        cart.getItems().clear();
-        cartService.save(cart);
+		// ✅ 清除購物車
+		cartService.clearCart(cart.getId());
 
-        // ✅ 回傳訂單編號
-        return order.getId();
-    }
+		// ✅ 回傳訂單編號
+		return order.getId();
+	}
 }

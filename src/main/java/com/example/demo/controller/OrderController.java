@@ -1,40 +1,116 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Cart;
+import com.example.demo.model.User;
+import com.example.demo.service.CartService;
+import com.example.demo.service.OrderService;
+import com.example.demo.service.PaymentService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 
 @Controller
+@RequestMapping("/orders")
 public class OrderController {
 
-    // ✅ 提交訂單
-    @PostMapping("/order/submit")
-    public String submitOrder(HttpSession session, Model model,
-                              String receiverName,
-                              String receiverPhone,
-                              String receiverAddress) {
+	@Autowired
+	private CartService cartService;
 
-        // 從 Session 取得購物車
-        Cart cart = (Cart) session.getAttribute("cart");
+	@Autowired
+	private OrderService orderService;
 
-        // 如果購物車沒有東西 → 回購物車
-        if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
-            return "redirect:/cart";
-        }
+	@Autowired
+	private PaymentService paymentService;
 
-        // ✅ 這裡目前先用「毫秒」模擬訂單編號（之後會改成寫進資料庫）
-        long orderId = System.currentTimeMillis();
+	/** ✅ 查看我的訂單列表 */
+	@GetMapping
+	public String listMyOrders(HttpSession session, Model model) {
 
-        // ✅ 將 orderId 傳給成功頁面
-        model.addAttribute("orderId", orderId);
+		User user = (User) session.getAttribute("loggedInUser");
+		if (user == null)
+			return "redirect:/login";
 
-        // ✅ 清空購物車
-        session.removeAttribute("cart");
+		model.addAttribute("orders", orderService.findByUserId(user.getId()));
+		return "order-list";
+	}
 
-        // ✅ 導向成功頁面 (order-success.html)
-        return "order-success";
-    }
+	/** ✅ 查看訂單詳細資訊 */
+	@GetMapping("/{id}")
+	public String viewOrderDetail(@PathVariable Long id, HttpSession session, Model model) {
+
+		User user = (User) session.getAttribute("loggedInUser");
+		if (user == null)
+			return "redirect:/login";
+
+		model.addAttribute("order", orderService.findById(id));
+		return "order-detail";
+	}
+
+	/** ✅ 修改訂單狀態 */
+	@PostMapping("/{id}/update-status")
+	public String updateOrderStatus(@PathVariable Long id, @RequestParam String status, HttpSession session) {
+
+		User user = (User) session.getAttribute("loggedInUser");
+		if (user == null)
+			return "redirect:/login";
+
+		orderService.updateStatus(id, status);
+		return "redirect:/orders";
+	}
+
+	/** ✅ 付款 */
+	@PostMapping("/{id}/pay")
+	public String payOrder(@PathVariable Long id, @RequestParam(defaultValue = "ATM") String method,
+			@RequestParam(defaultValue = "Bank") String provider, HttpSession session) {
+
+		User user = (User) session.getAttribute("loggedInUser");
+		if (user == null)
+			return "redirect:/login";
+
+		var order = orderService.findById(id);
+		paymentService.pay(order, method, provider);
+
+		return "redirect:/orders/" + id;
+	}
+
+	/** ✅ 結帳頁 */
+	@GetMapping("/checkout")
+	public String checkoutPage(HttpSession session, Model model) {
+
+		User user = (User) session.getAttribute("loggedInUser");
+		if (user == null)
+			return "redirect:/login";
+
+		Cart cart = cartService.getCartByMember(user);
+		if (cart == null || cart.getItems().isEmpty())
+			return "redirect:/cart";
+
+		model.addAttribute("cart", cart);
+		return "checkout";
+	}
+
+	/** ✅ 提交訂單（寫入資料庫） */
+	@PostMapping("/submit")
+	public String submitOrder(HttpSession session, Model model, @RequestParam String receiverName,
+			@RequestParam String receiverPhone, @RequestParam String receiverAddress,
+			@RequestParam(defaultValue = "ATM") String paymentMethod,
+			@RequestParam(defaultValue = "二聯式") String invoiceType) {
+
+		User user = (User) session.getAttribute("loggedInUser");
+		if (user == null)
+			return "redirect:/login";
+
+		Cart cart = cartService.getCartByMember(user);
+		if (cart == null)
+			return "redirect:/cart";
+
+		Long orderId = orderService.createOrder(user, cart, paymentMethod, invoiceType, receiverAddress);
+
+		model.addAttribute("orderId", orderId);
+		return "order-success";
+	}
 }

@@ -70,4 +70,15 @@ public class CartItemDAOImpl implements CartItemDAO {
                 .setParameter("product", product)
                 .uniqueResult();
     }
+    
+    @Override
+    public void deleteByCartId(Long cartId) {
+        getSession()
+            .createQuery("DELETE FROM CartItem WHERE cart.id = :cartId")
+            .setParameter("cartId", cartId)
+            .executeUpdate();
+    }
+    
+    
+   
 }
