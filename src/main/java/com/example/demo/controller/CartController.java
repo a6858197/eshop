@@ -32,7 +32,7 @@ public class CartController {
 		return cart;
 	}
 
-	/** ✅ 加入購物車（依登入狀態處理） */
+	/** ✅ 加入購物車 */
 	@PostMapping("/add/{productId}")
 	public String addToCart(@PathVariable Long productId, @RequestParam int quantity, HttpSession session) {
 
@@ -53,20 +53,20 @@ public class CartController {
 		return "redirect:/products";
 	}
 
-	/** ✅ 查看購物車頁面 */
+	/** ✅ 查看購物車 */
 	@GetMapping
 	public String viewCart(HttpSession session, Model model) {
 
 		User user = (User) session.getAttribute("loggedInUser");
 
 		if (user == null) {
-			// 未登入 → 用 Session 購物車
-			Cart cart = getSessionCart(session);
-			model.addAttribute("cart", cart);
+			// 未登入 → Session 購物車
+			Cart sessionCart = getSessionCart(session);
+			model.addAttribute("cart", sessionCart);
 			return "cart";
 		}
 
-		// ✅ 已登入 → 用 DB 購物車
+		// ✅ 已登入 → 資料庫購物車
 		Cart cart = cartService.getCartByMember(user);
 		model.addAttribute("cart", cart);
 		return "cart";
@@ -92,7 +92,9 @@ public class CartController {
 		if (user == null)
 			return "redirect:/login";
 
+		// ✅ 直接使用 cartService.removeItem() 來刪除 DB cart_item
 		cartService.removeItem(user, itemId);
+
 		return "redirect:/cart";
 	}
 

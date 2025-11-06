@@ -95,8 +95,8 @@ public class OrderItem {
 	private void recalcSubtotal() {
 		if (this.price != null && this.quantity != null) {
 			this.subtotal = this.price * this.quantity;
-		} else {
-			this.subtotal = 0.0;
+			} else {
+				this.subtotal = 0.0;
 		}
 	}
 

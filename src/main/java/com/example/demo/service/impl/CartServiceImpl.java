@@ -32,7 +32,7 @@ public class CartServiceImpl implements CartService {
 		return cartDAO.findByMemberId(member.getId());
 	}
 
-	// ✅ 未登入：使用 Session Cart
+	// ✅ 未登入：使用 Session 購物車
 	@Override
 	public Cart addToGuestCart(Cart sessionCart, Product product, int quantity) {
 
@@ -70,7 +70,7 @@ public class CartServiceImpl implements CartService {
 		if (cart == null) {
 			cart = new Cart();
 			cart.setMember(member);
-			cartDAO.save(cart); // ✅ 使用 save() (新增 / 更新 自動判斷)
+			cartDAO.save(cart);
 		}
 
 		CartItem item = cartItemDAO.findByCartIdAndProductId(cart.getId(), product.getId());
@@ -102,35 +102,27 @@ public class CartServiceImpl implements CartService {
 	// ✅ 更新數量
 	@Override
 	public void updateQuantity(User user, Long itemId, int quantity) {
-		Cart cart = cartDAO.findByMemberId(user.getId());
 		CartItem item = cartItemDAO.findById(itemId);
-
-		if (item != null && item.getCart().getId().equals(cart.getId())) {
+		if (item != null && item.getCart().getMember().getId().equals(user.getId())) {
 			item.setQuantity(quantity);
+			cartItemDAO.update(item);
 		}
 	}
 
-	// ✅ 移除單一商品
+	// ✅ 修正：移除單一商品（用 itemId，不用 productId）
 	@Override
-	public void removeItem(User member, Long productId) {
-
-		Cart cart = getCartByMember(member);
-		if (cart == null)
-			return;
-
-		CartItem item = cartItemDAO.findByCartIdAndProductId(cart.getId(), productId);
-		if (item != null) {
-			cartItemDAO.delete(item.getId());
+	public void removeItem(User user, Long itemId) {
+		CartItem item = cartItemDAO.findById(itemId);
+		if (item != null && item.getCart().getMember().getId().equals(user.getId())) {
+			cartItemDAO.delete(itemId);
 		}
 	}
 
-	// ✅ CheckoutService 呼叫：清空 / 更新購物車
 	@Override
 	public void save(Cart cart) {
 		cartDAO.save(cart);
 	}
 
-	// ✅ 清空購物車
 	@Override
 	public void clearCart(Long cartId) {
 		cartItemDAO.deleteByCartId(cartId);

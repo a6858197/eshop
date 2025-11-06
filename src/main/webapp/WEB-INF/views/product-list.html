@@ -144,16 +144,18 @@ body {
 	<!-- ✅ 頂部工具列 -->
 	<div class="top-bar">
 		<span th:if="${loggedInUser != null}"> 👋 歡迎，<strong
-			th:text="${loggedInUser.name}"></strong>
-		</span> <a th:href="@{/cart}" class="btn">🛒 檢視訂單</a> <span
-			th:if="${loggedInUser == null}"> <a th:href="@{/login}"
-			class="btn">登入</a>
+			th:text="${loggedInUser.name}"></strong></span>
+
+		<!-- ✅ ⬇⬇ 新增：檢視訂單按鈕 -->
+		<a th:href="@{/orders}" class="btn">🧾 查看 訂單</a> <a th:href="@{/cart}"
+			class="btn">🛒 查看購物車</a> <span th:if="${loggedInUser == null}">
+			<a th:href="@{/login}" class="btn">登入</a>
 		</span> <span th:if="${loggedInUser != null}"> <a th:href="@{/logout}"
 			class="btn">登出</a>
 		</span>
 	</div>
 
-	<!-- ✅ 加入購物車的成功訊息 -->
+	<!-- ✅ 加入購物車成功訊息 -->
 	<div th:if="${message}" class="message" th:text="${message}"></div>
 
 	<h1 style="text-align: center; font-size: 40px; margin-top: 10px;">商品列表</h1>
@@ -183,6 +185,7 @@ body {
 			<a th:href="@{'/products/' + ${p.id}}"> <img
 				th:src="@{${p.image}}" alt="商品圖片">
 			</a>
+
 			<div class="action-box">
 				<a th:href="@{'/products/' + ${p.id}}" class="btn">查看</a>
 				<form th:action="@{'/cart/add/' + ${p.id}}" method="post">

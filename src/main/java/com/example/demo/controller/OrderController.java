@@ -26,7 +26,7 @@ public class OrderController {
 	@Autowired
 	private PaymentService paymentService;
 
-	/** ✅ 查看我的訂單列表 */
+	/** ✅ 我的訂單列表 */
 	@GetMapping
 	public String listMyOrders(HttpSession session, Model model) {
 
@@ -38,7 +38,7 @@ public class OrderController {
 		return "order-list";
 	}
 
-	/** ✅ 查看訂單詳細資訊 */
+	/** ✅ 查看訂單明細 */
 	@GetMapping("/{id}")
 	public String viewOrderDetail(@PathVariable Long id, HttpSession session, Model model) {
 
@@ -50,7 +50,7 @@ public class OrderController {
 		return "order-detail";
 	}
 
-	/** ✅ 修改訂單狀態 */
+	/** ✅ 更新訂單狀態（後台 or 用戶操作） */
 	@PostMapping("/{id}/update-status")
 	public String updateOrderStatus(@PathVariable Long id, @RequestParam String status, HttpSession session) {
 
@@ -93,7 +93,7 @@ public class OrderController {
 		return "checkout";
 	}
 
-	/** ✅ 提交訂單（寫入資料庫） */
+	/** ✅ 提交訂單（下單） */
 	@PostMapping("/submit")
 	public String submitOrder(HttpSession session, Model model, @RequestParam String receiverName,
 			@RequestParam String receiverPhone, @RequestParam String receiverAddress,
@@ -112,5 +112,17 @@ public class OrderController {
 
 		model.addAttribute("orderId", orderId);
 		return "order-success";
+	}
+
+	/** ✅ 刪除訂單 */
+	@GetMapping("/delete/{id}")
+	public String deleteOrder(@PathVariable Long id, HttpSession session) {
+
+		User user = (User) session.getAttribute("loggedInUser");
+		if (user == null)
+			return "redirect:/login";
+
+		orderService.delete(id);
+		return "redirect:/orders";
 	}
 }
