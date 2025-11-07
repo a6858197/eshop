@@ -19,104 +19,123 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-@Transactional // ✅ 讓 Hibernate Session 在整個交易中有效（避免 Lazy Initialization 錯誤）
+@Transactional
 public class OrderServiceImpl implements OrderService {
 
-    @Autowired
-    private OrderDAO orderDAO;
+	@Autowired
+	private OrderDAO orderDAO;
 
-    @Autowired
-    private OrderItemDAO orderItemDAO;
+	@Autowired
+	private OrderItemDAO orderItemDAO;
 
-    @Autowired
-    private CartDAO cartDAO;
+	@Autowired
+	private CartDAO cartDAO;
 
-    /** ✅ 建立訂單 */
-    @Override
-    public Long createOrder(User user, Cart cart, String paymentMethod, String invoiceType, String address) {
+	/** ✅ 全部結帳 */
+	@Override
+	public Long createOrder(User user, Cart cart, String paymentMethod, String invoiceType, String address) {
 
-        // ✅ 重新載入 cart（含 items），避免 LazyInitializationException
-        cart = cartDAO.findByMemberId(user.getId());
+		cart = cartDAO.findByMemberId(user.getId());
 
-        if (cart == null || cart.getItems() == null || cart.getItems().isEmpty()) {
-            throw new RuntimeException("❌ 購物車是空的，無法建立訂單");
-        }
+		if (cart == null || cart.getItems().isEmpty())
+			throw new RuntimeException("❌ 購物車是空的，無法建立訂單");
 
-        // ✅ 建立訂單主檔
-        Order order = new Order();
-        order.setUser(user);
-        order.setOrderDate(new Date());
-        order.setPaymentMethod(paymentMethod);
-        order.setInvoiceType(invoiceType);
-        order.setAddress(address);
-        order.setStatus("待付款");
+		return createOrderFromItems(user, cart.getItems(), cart, paymentMethod, invoiceType, address, true);
+	}
 
-        // ✅ 初始化訂單明細列表
-        order.setItems(new ArrayList<>());
+	/** ✅ 部分結帳：只轉換勾選的商品 */
+	@Override
+	public Long createOrderPartially(User user, Long[] selectedItemIds, String paymentMethod, String invoiceType,
+			String address) {
 
-        double total = 0.0;
+		Cart cart = cartDAO.findByMemberId(user.getId());
+		if (cart == null || cart.getItems().isEmpty())
+			throw new RuntimeException("❌ 購物車是空的");
 
-        // ✅ 將購物車轉成訂單明細
-        for (CartItem item : cart.getItems()) {
+		List<CartItem> checkoutItems = new ArrayList<>();
 
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(order);
-            orderItem.setProduct(item.getProduct());
-            orderItem.setQuantity(item.getQuantity());
-            orderItem.setPrice(item.getPriceSnapshot());
-            orderItem.setSubtotal(item.getSubtotal());
+		for (CartItem item : cart.getItems()) {
+			for (Long sid : selectedItemIds) {
+				if (item.getId().equals(sid)) {
+					checkoutItems.add(item);
+				}
+			}
+		}
 
-            order.getItems().add(orderItem);
-            total += item.getSubtotal();
-        }
+		return createOrderFromItems(user, checkoutItems, cart, paymentMethod, invoiceType, address, false);
+	}
 
-        order.setTotal(total);
+	/** ✅ 共用建立訂單邏輯 */
+	private Long createOrderFromItems(User user, List<CartItem> itemsToOrder, Cart cart, String paymentMethod,
+			String invoiceType, String address, boolean clearWholeCart) {
 
-        // ✅ 儲存訂單（包含明細）
-        orderDAO.save(order);
+		Order order = new Order();
+		order.setUser(user);
+		order.setOrderDate(new Date());
+		order.setPaymentMethod(paymentMethod);
+		order.setInvoiceType(invoiceType);
+		order.setAddress(address);
+		order.setStatus("待付款");
 
-        // ✅ 清空購物車
-        cart.getItems().clear();
-        cartDAO.save(cart);
+		order.setItems(new ArrayList<>());
+		double total = 0;
 
-        return order.getId();
-    }
+		for (CartItem item : itemsToOrder) {
+			OrderItem oi = new OrderItem();
+			oi.setOrder(order);
+			oi.setProduct(item.getProduct());
+			oi.setQuantity(item.getQuantity());
+			oi.setPrice(item.getPriceSnapshot());
+			oi.setSubtotal(item.getSubtotal());
 
-    @Override
-    public List<Order> findAll() {
-        return orderDAO.findAll();
-    }
+			order.getItems().add(oi);
+			total += item.getSubtotal();
+		}
 
-    @Override
-    public Order findById(Long id) {
-        return orderDAO.findById(id);
-    }
+		order.setTotal(total);
+		orderDAO.save(order);
 
-    @Override
-    public List<Order> findByUserId(Long userId) {
-        return orderDAO.findByUserId(userId);
-    }
+		// ✅ 清除購物車中已結帳商品
+		if (clearWholeCart) {
+			cart.getItems().clear();
+		} else {
+			cart.getItems().removeAll(itemsToOrder);
+		}
 
-    @Override
-    public void updateStatus(Long orderId, String status) {
-        Order order = orderDAO.findById(orderId);
-        if (order != null) {
-            order.setStatus(status);
-            orderDAO.save(order);
-        }
-    }
+		cartDAO.save(cart);
+		return order.getId();
+	}
 
-    /** ✅ 刪除訂單（含明細） */
-    @Override
-    public void delete(Long orderId) {
+	@Override
+	public Order findById(Long id) {
+		return orderDAO.findById(id);
+	}
 
-        // ✅ 先刪除訂單明細
-        orderItemDAO.deleteByOrderId(orderId);
+	@Override
+	public List<Order> findByUserId(Long userId) {
+		return orderDAO.findByUserId(userId);
+	}
 
-        // ✅ 再刪訂單主檔
-        Order order = orderDAO.findById(orderId);
-        if (order != null) {
-            orderDAO.delete(order); // ✅ 這裡一定要用 delete，而不是 save!!
-        }
-    }
+	@Override
+	public List<Order> findAll() {
+		return orderDAO.findAll();
+	}
+
+	@Override
+	public void updateStatus(Long orderId, String status) {
+		Order order = orderDAO.findById(orderId);
+		if (order != null) {
+			order.setStatus(status);
+			orderDAO.save(order);
+		}
+	}
+
+	@Override
+	public void delete(Long orderId) {
+		orderItemDAO.deleteByOrderId(orderId);
+		Order order = orderDAO.findById(orderId);
+		if (order != null) {
+			orderDAO.delete(order);
+		}
+	}
 }

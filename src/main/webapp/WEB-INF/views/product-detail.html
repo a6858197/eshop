@@ -53,11 +53,11 @@ img {
 
 <body>
 
-	<!-- ✅ 顯示登入者 -->
+	<!-- ✅ 顯示登入者（統一使用 loggedInUser） -->
 	<div style="text-align: right; margin-bottom: 10px;">
-		<span th:if="${loginUser != null}"> 👋 歡迎, <span
-			th:text="${loginUser.name}"></span> | <a th:href="@{/logout}">登出</a>
-		</span> <span th:if="${loginUser == null}"> <a th:href="@{/login}">登入</a>
+		<span th:if="${loggedInUser != null}"> 👋 歡迎, <span
+			th:text="${loggedInUser.name}"></span> | <a th:href="@{/logout}">登出</a>
+		</span> <span th:if="${loggedInUser == null}"> <a th:href="@{/login}">登入</a>
 		</span>
 	</div>
 
@@ -70,7 +70,6 @@ img {
 
 		<p>
 			<img th:src="@{${product.image}}" width="200" />
-
 		</p>
 
 		<p>
@@ -80,9 +79,8 @@ img {
 		<p>描述：</p>
 		<p th:text="${product.description}"></p>
 
-		<!-- ✅ 加入購物車 -->
-		<form th:action="@{/cart/add}" method="post">
-			<input type="hidden" name="productId" th:value="${product.id}">
+		<!-- ✅ 加入購物車（修正 action 路徑） -->
+		<form th:action="@{'/cart/add/' + ${product.id}}" method="post">
 			<input type="number" name="quantity" value="1" min="1">
 			<button type="submit" class="add-cart-btn">加入購物車</button>
 		</form>

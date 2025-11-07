@@ -100,8 +100,9 @@ input {
 		</thead>
 
 		<tbody>
-			<!-- ✅ 改成動態資料 -->
-			<tr th:each="item : ${cart.items}">
+			<!-- ✅ 只顯示被勾選的商品 -->
+			<tr th:each="item : ${cart.items}"
+				th:if="${#arrays.contains(selectedItems, item.id)}">
 				<td th:text="${item.product.name}"></td>
 				<td th:text="${item.priceSnapshot}"></td>
 				<td th:text="${item.quantity}"></td>
@@ -110,22 +111,17 @@ input {
 		</tbody>
 	</table>
 
-	<div class="total-box">
-		總金額：<span th:text="${cart.total}"></span> 元
-	</div>
+	<div class="total-box">✅ 訂單總額會在送出後計算</div>
 
 	<hr style="margin-top: 40px; margin-bottom: 30px; border-color: #444;">
 
 	<h3 style="text-align: center;">收件資訊</h3>
 
-	<!-- ✅ 修正路徑 -->
 	<form th:action="@{/orders/submit}" method="post"
 		style="text-align: center; margin-top: 20px;">
-
 		<input type="text" name="receiverName" placeholder="收件人姓名" required><br>
 		<input type="text" name="receiverPhone" placeholder="收件人電話" required><br>
 		<input type="text" name="receiverAddress" placeholder="收件地址" required><br>
-
 		<button type="submit">確認送出訂單</button>
 	</form>
 

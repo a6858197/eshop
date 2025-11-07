@@ -85,11 +85,14 @@ public class OrderController {
 		if (user == null)
 			return "redirect:/login";
 
-		Cart cart = cartService.getCartByMember(user);
-		if (cart == null || cart.getItems().isEmpty())
+		Long[] selectedItems = (Long[]) session.getAttribute("selectedItems");
+		if (selectedItems == null)
 			return "redirect:/cart";
 
+		Cart cart = cartService.getCartByMember(user);
+		model.addAttribute("selectedItems", selectedItems);
 		model.addAttribute("cart", cart);
+
 		return "checkout";
 	}
 
